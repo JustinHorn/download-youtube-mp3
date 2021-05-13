@@ -1,0 +1,17 @@
+{
+  "name": "download-mp3",
+  "version": "1.0.0",
+  "description": "tsting to download an npm 3",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Justin Horn",
+  "license": "MIT",
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.2",
+    "fs": "^0.0.1-security",
+    "ytdl-core": "^4.5.0"
+  }
+}
