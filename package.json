@@ -1,17 +1,25 @@
 {
-  "name": "download-mp3",
-  "version": "1.0.0",
-  "description": "tsting to download an npm 3",
-  "main": "index.js",
+  "name": "download-youtube-mp3",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./bin/www",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./bin/www",
+    "dev":"nodemon",
+    "download": "node download.js"
   },
-  "author": "Justin Horn",
-  "license": "MIT",
   "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "ejs": "~2.6.1",
+    "express": "~4.16.1",
     "fluent-ffmpeg": "^2.1.2",
     "fs": "^0.0.1-security",
-    "ytdl-core": "^4.5.0"
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "ytdl-core": "4.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
