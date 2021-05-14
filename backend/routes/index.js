@@ -11,7 +11,7 @@ router.get("/", function (req, res, next) {
 router.get("/parseVideo/:videoUrl", async function (req, res, next) {
   const { videoUrl } = req.params;
   await parseVideo("https://www.youtube.com/watch?v=" + videoUrl);
-  res.download("output.mp3").send("loadVideo");
+  res.download("output.mp3");
 });
 
 module.exports = router;
