@@ -23,11 +23,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  audio_manager: ^0.7.3
+  path_provider: ^2.0.1
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  flutter_hooks: ^0.17.0
 
 dev_dependencies:
   flutter_test:
@@ -74,3 +77,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  assets:
+    - "assets/output.mp3"
