@@ -76,14 +76,14 @@ class TestWidget extends HookWidget {
       );
 
       final tasks = await FlutterDownloader.loadTasks();
-      FlutterDownloader.open(taskId: taskId);
+      await FlutterDownloader.open(taskId: taskId);
       print(tasks.toString());
     };
 
     final open = () async {
-      // FlutterDownloader.open(
-      //     taskId: "com.example.mobile.download.background.1621179136.349398.1");
-      final tasks = await FlutterDownloader.loadTasks();
+      FlutterDownloader.open(
+          taskId: "com.example.mobile.download.background.1621179136.349398.1");
+      // final tasks = await FlutterDownloader.loadTasks();
     };
 
     useEffect(() {
@@ -136,6 +136,9 @@ class TestWidget extends HookWidget {
             onPressed: () async {
               final tasks = await FlutterDownloader.loadTasks();
               final first = tasks.first;
+              tasks.forEach((element) {
+                print(element.filename);
+              });
               final path =
                   first.savedDir + Platform.pathSeparator + first.filename;
 
@@ -143,7 +146,7 @@ class TestWidget extends HookWidget {
               print(path);
               print("______");
               AudioManager.instance
-                  .start(path, 'Ching Chang Chong')
+                  .start("file://" + path, 'Ching Chang Chong')
                   .then((err) {
                 print(err);
               });
