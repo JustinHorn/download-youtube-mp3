@@ -5,7 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main() {
+import 'package:flutter_downloader/flutter_downloader.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FlutterDownloader.initialize(
+      debug: true // optional: set false to disable printing logs to console
+      );
+  FlutterDownloader.registerCallback(downloadCallback);
+
   runApp(MyApp());
 }
 
@@ -23,6 +31,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
+void downloadCallback(String id, DownloadTaskStatus status, int progress) {
+  print(
+      'Background Isolate Callback: task ($id) is in status ($status) and process ($progress)');
+}
+
 class TestWidget extends HookWidget {
   final String title;
 
@@ -35,16 +48,43 @@ class TestWidget extends HookWidget {
   }
 
   Future<File> get _localFile async {
-  final path = await _localPath;
-  File('$path/counter.txt').
-  return File('$path/counter.txt');
-}
+    final path = await _localPath;
+    return File('$path/counter.txt');
+  }
 
   @override
   Widget build(BuildContext context) {
     final counter = useState(0);
 
-    final donwload = () => {};
+    final donwload = () async {
+      var localPath = (await getApplicationDocumentsDirectory()).path +
+          Platform.pathSeparator +
+          'Download';
+      final savedDir = Directory(localPath);
+      bool hasExisted = await savedDir.exists();
+      if (!hasExisted) {
+        await savedDir.create();
+      }
+
+      var taskId = await FlutterDownloader.enqueue(
+        url: 'http://localhost:3000/parseVideo/32si5cfrCNc',
+        savedDir: localPath,
+        showNotification:
+            true, // show download progress in status bar (for Android)
+        openFileFromNotification:
+            true, // click on notification to open downloaded file (for Android)
+      );
+
+      final tasks = await FlutterDownloader.loadTasks();
+      FlutterDownloader.open(taskId: taskId);
+      print(tasks.toString());
+    };
+
+    final open = () async {
+      // FlutterDownloader.open(
+      //     taskId: "com.example.mobile.download.background.1621179136.349398.1");
+      final tasks = await FlutterDownloader.loadTasks();
+    };
 
     useEffect(() {
       AudioManager.instance.onEvents((events, args) {
@@ -76,6 +116,15 @@ class TestWidget extends HookWidget {
         children: [
           FloatingActionButton(
             onPressed: () async {
+              open();
+              print('opneing');
+            },
+            tooltip: 'open',
+            child: Icon(Icons.open_in_browser),
+          ),
+          SizedBox(height: 10),
+          FloatingActionButton(
+            onPressed: () async {
               await AudioManager.instance.playOrPause();
               print('played');
             },
@@ -85,9 +134,16 @@ class TestWidget extends HookWidget {
           SizedBox(height: 10),
           FloatingActionButton(
             onPressed: () async {
+              final tasks = await FlutterDownloader.loadTasks();
+              final first = tasks.first;
+              final path =
+                  first.savedDir + Platform.pathSeparator + first.filename;
+
+              print(await File(path).exists());
+              print(path);
+              print("______");
               AudioManager.instance
-                  .start('http://localhost:3000/parseVideo/32si5cfrCNc',
-                      'Ching Chang Chong')
+                  .start(path, 'Ching Chang Chong')
                   .then((err) {
                 print(err);
               });
@@ -97,7 +153,9 @@ class TestWidget extends HookWidget {
           ),
           SizedBox(height: 10),
           FloatingActionButton(
-            onPressed: () => counter.value++,
+            onPressed: () async {
+              donwload();
+            },
             tooltip: 'Increment',
             child: Icon(Icons.file_download),
           ),
