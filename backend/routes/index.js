@@ -7,13 +7,13 @@ router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
 
-router.get("/parseVideo/:videoUrl", async function (req, res, next) {
+router.get("/parseVideo/:videoCode", async function (req, res, next) {
   try {
-    const { videoUrl } = req.params;
+    const { videoCode } = req.params;
     console.log("got request");
 
-    await parseVideo(videoUrl);
-    res.download("output.mp3");
+    await parseVideo(videoCode);
+    res.download(videoCode + ".mp3");
   } catch (e) {
     next(e);
     res.status(400).send("error");

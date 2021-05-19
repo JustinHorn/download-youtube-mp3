@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:audio_manager/audio_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+
+import 'music_tile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,13 +51,9 @@ class HomePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final counter = useState(0);
+    final inputText = useState("");
 
     final downloads = useState<List<DownloadTask>>([]);
-
-    final open = () async {
-      // final tasks = await FlutterDownloader.loadTasks();
-    };
 
     useEffect(() {
       AudioManager.instance.onEvents((events, args) {
@@ -72,18 +71,46 @@ class HomePage extends HookWidget {
         title: Text(title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: downloads.value
-              .map((dT) => TextButton(
-                    onPressed: () => loadSongByFileName(dT.filename),
-                    child: Container(
-                      padding: EdgeInsets.all(8.0),
-                      color: Colors.amber,
-                      child: Text(dT.filename),
+        child: Container(
+          height: double.infinity,
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: TextField(
+                      decoration: InputDecoration(hintText: "Enter Video Code"),
+                      onChanged: (t) => inputText.value = t,
                     ),
-                  ))
-              .toList(),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.file_download),
+                    onPressed: () => download(inputText.value),
+                  )
+                ],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: downloads.value
+                    .map((dT) => MusicTile(
+                          downloadTask: dT,
+                          onPlay: () => loadSongByFileName(dT.filename),
+                          onDelete: () async {
+                            await deleteTask(dT.taskId);
+                            downloads.value =
+                                await FlutterDownloader.loadTasks();
+                          },
+                        ))
+                    .toList(),
+              ),
+              SizedBox(
+                height: 0,
+              )
+            ],
+          ),
         ),
       ),
       floatingActionButton: Column(
@@ -91,27 +118,21 @@ class HomePage extends HookWidget {
         children: [
           FloatingActionButton(
             onPressed: () async {
-              open();
-            },
-            tooltip: 'open',
-            child: Icon(Icons.open_in_browser),
-          ),
-          SizedBox(height: 10),
-          FloatingActionButton(
-            onPressed: () async {
               await AudioManager.instance.playOrPause();
               print('played');
             },
             tooltip: 'play',
-            child: Icon(Icons.play_arrow),
+            child: Icon(AudioManager.instance.isPlaying
+                ? Icons.pause
+                : Icons.play_arrow),
           ),
           SizedBox(height: 10),
           FloatingActionButton(
             onPressed: () async {
-              download('lz8sUiXAnbs');
+              downloads.value = await FlutterDownloader.loadTasks();
             },
             tooltip: 'Increment',
-            child: Icon(Icons.file_download),
+            child: Icon(Icons.repeat),
           ),
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -123,11 +144,17 @@ class HomePage extends HookWidget {
         Platform.pathSeparator +
         'Download';
     final path = localPath + Platform.pathSeparator + fileName;
+    AudioManager.instance.stop();
 
     AudioManager.instance.start("file://" + path, 'Ching Chang Chong');
   }
 
-  download(videoID) async {
+  deleteTask(taskId) async {
+    var tasks = await FlutterDownloader.loadTasks();
+    FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
+  }
+
+  download(String videoId) async {
     var localPath = (await getApplicationDocumentsDirectory()).path +
         Platform.pathSeparator +
         'Download';
@@ -138,8 +165,8 @@ class HomePage extends HookWidget {
     }
 
     var taskId = await FlutterDownloader.enqueue(
-      url: 'http://localhost:3000/parseVideo/' + videoID,
-      fileName: videoID + ".mp3",
+      url: 'http://localhost:3000/parseVideo/' + videoId,
+      fileName: videoId + ".mp3",
       savedDir: localPath,
       showNotification:
           true, // show download progress in status bar (for Android)
