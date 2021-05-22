@@ -1,12 +1,15 @@
 import 'dart:io';
 
 import 'package:audio_manager/audio_manager.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:mobile/database.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
+import 'models/video_info.dart';
 import 'music_tile.dart';
 
 void main() async {
@@ -53,15 +56,14 @@ class HomePage extends HookWidget {
   Widget build(BuildContext context) {
     final inputText = useState("");
 
-    final downloads = useState<List<DownloadTask>>([]);
+    final videoInfos = useState<List<VideoInfo>>([]);
 
     useEffect(() {
       AudioManager.instance.onEvents((events, args) {
         print("$events, $args");
       });
       () async {
-        var tasks = await FlutterDownloader.loadTasks();
-        downloads.value = tasks;
+        videoInfos.value = await DatabaseHelper.getVideoInfos();
       }();
       return () => {};
     }, []);
@@ -94,14 +96,16 @@ class HomePage extends HookWidget {
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: downloads.value
-                    .map((dT) => MusicTile(
-                          downloadTask: dT,
-                          onPlay: () => loadSongByFileName(dT.filename),
+                children: videoInfos.value
+                    .map((info) => MusicTile(
+                          videoInfo: info,
+                          onPlay: () => loadSongByTaskId(info.taskId),
                           onDelete: () async {
-                            await deleteTask(dT.taskId);
-                            downloads.value =
-                                await FlutterDownloader.loadTasks();
+                            await FlutterDownloader.remove(
+                                taskId: info.taskId, shouldDeleteContent: true);
+                            await DatabaseHelper.deleteVideoInfo(info.code);
+                            videoInfos.value =
+                                await DatabaseHelper.getVideoInfos();
                           },
                         ))
                     .toList(),
@@ -129,7 +133,7 @@ class HomePage extends HookWidget {
           SizedBox(height: 10),
           FloatingActionButton(
             onPressed: () async {
-              downloads.value = await FlutterDownloader.loadTasks();
+              videoInfos.value = await DatabaseHelper.getVideoInfos();
             },
             tooltip: 'Increment',
             child: Icon(Icons.repeat),
@@ -139,22 +143,29 @@ class HomePage extends HookWidget {
     );
   }
 
-  loadSongByFileName(fileName) async {
-    var localPath = (await getApplicationDocumentsDirectory()).path +
-        Platform.pathSeparator +
-        'Download';
-    final path = localPath + Platform.pathSeparator + fileName;
+  loadSongByTaskId(taskId) async {
+    var tasks = await FlutterDownloader.loadTasks();
+    var task = tasks.firstWhere((element) => element.taskId == taskId);
+
+    final path = join(task.savedDir, task.filename);
     AudioManager.instance.stop();
 
     AudioManager.instance.start("file://" + path, 'Ching Chang Chong');
   }
 
-  deleteTask(taskId) async {
-    var tasks = await FlutterDownloader.loadTasks();
-    FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
-  }
-
   download(String videoId) async {
+    if (await DatabaseHelper.doesCodeAlreadyExist(videoId))
+      throw Exception('Video with Code has already been downloaded!');
+    var data;
+
+    try {
+      var response = await Dio().get("http://localhost:3000/info/$videoId");
+      data = response.data;
+    } catch (e) {
+      print(e);
+      return;
+    }
+
     var localPath = (await getApplicationDocumentsDirectory()).path +
         Platform.pathSeparator +
         'Download';
@@ -165,7 +176,7 @@ class HomePage extends HookWidget {
     }
 
     var taskId = await FlutterDownloader.enqueue(
-      url: 'http://localhost:3000/parseVideo/' + videoId,
+      url: data['audioURL'],
       fileName: videoId + ".mp3",
       savedDir: localPath,
       showNotification:
@@ -174,8 +185,8 @@ class HomePage extends HookWidget {
           true, // click on notification to open downloaded file (for Android)
     );
 
-    final tasks = await FlutterDownloader.loadTasks();
-    await FlutterDownloader.open(taskId: taskId);
-    print(tasks.toString());
+    data['taskId'] = taskId;
+    var videoInfo = VideoInfo.fromJSON(data);
+    await DatabaseHelper.insertVideoInfo(videoInfo);
   }
 }

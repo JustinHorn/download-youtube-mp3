@@ -25,20 +25,26 @@ router.get("/info/:videoCode", async function (req, res, next) {
   try {
     const { videoCode } = req.params;
 
-    let info = await ytdl.getInfo(videoCode);
-    let videoDetails = info.videoDetails;
-    let thumbnail = videoDetails.thumbnails[0].url;
-    let title = videoDetails.title;
-    let lengthSeconds = videoDetails.lengthSeconds;
+    const info = await ytdl.getInfo(videoCode);
+    const videoDetails = info.videoDetails;
+    const thumbnail = videoDetails.thumbnails[0].url;
+    const title = videoDetails.title;
+    const seconds = parseInt(videoDetails.lengthSeconds);
 
-    let audios = info.formats.filter(
+    const audios = info.formats.filter(
       (x) =>
         x.mimeType.includes("audio/mp4") || x.mimeType.includes("audio/mp3")
     );
 
-    let audio = audios.length > 0 ? audios[0].url : undefined;
+    const audioURL = audios.length > 0 ? audios[0].url : undefined;
 
-    const infoData = { title, thumbnail, lengthSeconds, audio };
+    const infoData = {
+      code: videoCode,
+      title,
+      thumbnail,
+      seconds,
+      audioURL,
+    };
     res.json(infoData);
   } catch (e) {
     next(e);

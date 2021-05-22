@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:mobile/models/video_info.dart';
 
 class MusicTile extends StatelessWidget {
-  final DownloadTask downloadTask;
+  final VideoInfo videoInfo;
   final Function onPlay;
   final Function onDelete;
 
-  const MusicTile({Key key, this.downloadTask, this.onPlay, this.onDelete})
+  const MusicTile({Key key, this.videoInfo, this.onPlay, this.onDelete})
       : super(key: key);
 
   @override
@@ -18,8 +19,7 @@ class MusicTile extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Music Name'),
-          Text(downloadTask.filename),
+          Text(videoInfo.title),
           IconButton(
             icon: Icon(Icons.play_arrow),
             onPressed: onPlay,
