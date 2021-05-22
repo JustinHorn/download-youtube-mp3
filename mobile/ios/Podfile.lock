@@ -1,5 +1,5 @@
 PODS:
-  - audio_manager (0.0.1):
+  - audioplayers (0.0.1):
     - Flutter
   - Flutter (1.0.0)
   - flutter_downloader (0.0.1):
@@ -14,7 +14,7 @@ PODS:
     - FMDB (>= 2.7.5)
 
 DEPENDENCIES:
-  - audio_manager (from `.symlinks/plugins/audio_manager/ios`)
+  - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
   - Flutter (from `Flutter`)
   - flutter_downloader (from `.symlinks/plugins/flutter_downloader/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
@@ -25,8 +25,8 @@ SPEC REPOS:
     - FMDB
 
 EXTERNAL SOURCES:
-  audio_manager:
-    :path: ".symlinks/plugins/audio_manager/ios"
+  audioplayers:
+    :path: ".symlinks/plugins/audioplayers/ios"
   Flutter:
     :path: Flutter
   flutter_downloader:
@@ -37,7 +37,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite/ios"
 
 SPEC CHECKSUMS:
-  audio_manager: 59466b2ea5552ebdcba8106796f09b9357ef12e0
+  audioplayers: 455322b54050b30ea4b1af7cd9e9d105f74efa8c
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_downloader: 058b9c41564a90500f67f3e432e3524613a7fd83
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a

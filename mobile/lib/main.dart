@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:audio_manager/audio_manager.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -18,6 +18,7 @@ void main() async {
       debug: true // optional: set false to disable printing logs to console
       );
   FlutterDownloader.registerCallback(downloadCallback);
+  AudioPlayer.logEnabled = true;
 
   runApp(MyApp());
 }
@@ -57,11 +58,20 @@ class HomePage extends HookWidget {
     final inputText = useState("");
 
     final videoInfos = useState<List<VideoInfo>>([]);
+    final audioplayer = useState<AudioPlayer>(AudioPlayer());
 
     useEffect(() {
-      AudioManager.instance.onEvents((events, args) {
-        print("$events, $args");
+      // AudioManager.instance.onEvents((events, args) {
+      //   print("$events, $args");
+      // });
+
+      audioplayer.value.onDurationChanged.listen((Duration d) {
+        print('Max duration: $d');
       });
+      audioplayer.value.onPlayerError.listen((error) {
+        print(error);
+      });
+
       () async {
         videoInfos.value = await DatabaseHelper.getVideoInfos();
       }();
@@ -99,7 +109,8 @@ class HomePage extends HookWidget {
                 children: videoInfos.value
                     .map((info) => MusicTile(
                           videoInfo: info,
-                          onPlay: () => loadSongByTaskId(info.taskId),
+                          onPlay: () =>
+                              loadSongByTaskId(info.taskId, audioplayer.value),
                           onDelete: () async {
                             await FlutterDownloader.remove(
                                 taskId: info.taskId, shouldDeleteContent: true);
@@ -122,13 +133,10 @@ class HomePage extends HookWidget {
         children: [
           FloatingActionButton(
             onPressed: () async {
-              await AudioManager.instance.playOrPause();
-              print('played');
+              await audioplayer.value.pause();
             },
             tooltip: 'play',
-            child: Icon(AudioManager.instance.isPlaying
-                ? Icons.pause
-                : Icons.play_arrow),
+            child: Icon(Icons.pause),
           ),
           SizedBox(height: 10),
           FloatingActionButton(
@@ -143,15 +151,14 @@ class HomePage extends HookWidget {
     );
   }
 
-  loadSongByTaskId(taskId) async {
+  loadSongByTaskId(taskId, AudioPlayer audioPlayer) async {
     var tasks = await FlutterDownloader.loadTasks();
     var task = tasks.firstWhere((element) => element.taskId == taskId);
 
     final path = join(task.savedDir, task.filename);
-
-    AudioManager.instance.stop();
     print(path);
-    AudioManager.instance.start("file://" + path, 'Ching Chang Chong');
+    var r = await audioPlayer.play('file://' + path, isLocal: true);
+    print(r);
   }
 
   download(String videoId) async {
