@@ -21,18 +21,41 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.fail);
   }
 
+  static Future<VideoInfo> getVideoInfo(String code) async {
+    final db = await DatabaseHelper.getDataBase();
+
+    final data = await db.query(
+      'VideoInfo',
+      where: "code = ?",
+      whereArgs: [code],
+    );
+
+    return data.map((d) => VideoInfo.fromMap(d)).toList().first;
+  }
+
   static Future<List<VideoInfo>> getVideoInfos() async {
     final db = await DatabaseHelper.getDataBase();
 
     final data = await db.query('VideoInfo');
 
-    return data.map((d) => VideoInfo.fromJSON(d)).toList();
+    return data.map((d) => VideoInfo.fromMap(d)).toList();
   }
 
   static Future<void> deleteVideoInfo(String code) async {
     final db = await DatabaseHelper.getDataBase();
 
     await db.delete("VideoInfo", where: 'code = ?', whereArgs: [code]);
+  }
+
+  static Future<void> updateVideoInfo(VideoInfo info) async {
+    final db = await DatabaseHelper.getDataBase();
+
+    await db.update(
+      'VideoInfo',
+      info.toMap(),
+      where: 'code = ?',
+      whereArgs: [info.code],
+    );
   }
 
   static Future<bool> doesCodeAlreadyExist(String code) async {

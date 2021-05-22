@@ -13,13 +13,19 @@ class MusicTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: MediaQuery.of(context).size.width * 0.8,
       margin: EdgeInsets.only(bottom: 5),
       padding: EdgeInsets.all(8.0),
       color: Colors.amber,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(videoInfo.title),
+          Flexible(
+            child: Text(
+              videoInfo.title,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           IconButton(
             icon: Icon(Icons.play_arrow),
             onPressed: onPlay,

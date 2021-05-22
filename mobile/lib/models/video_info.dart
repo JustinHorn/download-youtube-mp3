@@ -9,7 +9,7 @@ class VideoInfo {
   VideoInfo(this.code, this.title, this.thumbnail, this.seconds, this.audioURL,
       this.taskId);
 
-  static VideoInfo fromJSON(Map<String, dynamic> json) {
+  static VideoInfo fromMap(Map<String, dynamic> json) {
     return VideoInfo(
       json['code'],
       json['title'],

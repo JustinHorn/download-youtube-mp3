@@ -148,27 +148,40 @@ class HomePage extends HookWidget {
     var task = tasks.firstWhere((element) => element.taskId == taskId);
 
     final path = join(task.savedDir, task.filename);
-    AudioManager.instance.stop();
 
+    AudioManager.instance.stop();
+    print(path);
     AudioManager.instance.start("file://" + path, 'Ching Chang Chong');
   }
 
   download(String videoId) async {
-    if (await DatabaseHelper.doesCodeAlreadyExist(videoId))
-      throw Exception('Video with Code has already been downloaded!');
+    if (await DatabaseHelper.doesCodeAlreadyExist(videoId)) {
+      var fileData = await DatabaseHelper.getVideoInfo(videoId);
+
+      var tasks = await FlutterDownloader.loadTasks();
+      var task =
+          tasks.firstWhere((element) => element.taskId == fileData.taskId);
+      if (task.status == DownloadTaskStatus.failed) {
+        var info = fileData.toMap();
+
+        info['taskId'] = await FlutterDownloader.retry(taskId: task.taskId);
+        await DatabaseHelper.updateVideoInfo(VideoInfo.fromMap(info));
+      } else {
+        throw Exception('Video with Code has already been downloaded!');
+      }
+      return;
+    }
     var data;
 
     try {
-      var response = await Dio().get("http://localhost:3000/info/$videoId");
+      var response = await Dio().get("http://192.168.2.122:3000/info/$videoId");
       data = response.data;
     } catch (e) {
       print(e);
       return;
     }
 
-    var localPath = (await getApplicationDocumentsDirectory()).path +
-        Platform.pathSeparator +
-        'Download';
+    var localPath = (await getApplicationDocumentsDirectory()).path;
     final savedDir = Directory(localPath);
     bool hasExisted = await savedDir.exists();
     if (!hasExisted) {
@@ -186,7 +199,7 @@ class HomePage extends HookWidget {
     );
 
     data['taskId'] = taskId;
-    var videoInfo = VideoInfo.fromJSON(data);
+    var videoInfo = VideoInfo.fromMap(data);
     await DatabaseHelper.insertVideoInfo(videoInfo);
   }
 }
