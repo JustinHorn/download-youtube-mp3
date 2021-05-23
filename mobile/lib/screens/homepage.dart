@@ -6,16 +6,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:mobile/audio_player_task.dart';
 import 'package:mobile/database.dart';
 import 'package:mobile/models/video_info.dart';
 import 'package:mobile/music_tile.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-_backgroundTaskEntrypoint() {
-  AudioServiceBackground.run(() => AudioPlayerTask());
-}
+import 'audio_player_page.dart';
 
 class HomePage extends HookWidget {
   final String title;
@@ -82,17 +78,12 @@ class HomePage extends HookWidget {
                         .map((info) => MusicTile(
                               videoInfo: info,
                               onPlay: () async {
-                                var tasks = await FlutterDownloader.loadTasks();
-                                var task = tasks.firstWhere(
-                                    (element) => element.taskId == info.taskId);
-                                print(task);
-
-                                final path = join(task.savedDir, task.filename);
-
-                                AudioService.start(
-                                  backgroundTaskEntrypoint:
-                                      _backgroundTaskEntrypoint,
-                                  params: {'path': path},
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        AudioPlayerScreen(info),
+                                  ),
                                 );
                               },
                               onDelete: () async {
@@ -105,13 +96,6 @@ class HomePage extends HookWidget {
                               },
                             ))
                         .toList(),
-                  ),
-                  Row(
-                    children: [
-                      ElevatedButton(child: Text("Play"), onPressed: play),
-                      ElevatedButton(child: Text("Pause"), onPressed: pause),
-                      ElevatedButton(child: Text("Stop"), onPressed: stop),
-                    ],
                   ),
                   SizedBox(
                     height: 0,
@@ -146,21 +130,6 @@ class HomePage extends HookWidget {
     );
   }
 
-  play() => AudioService.play();
-
-  pause() => AudioService.pause();
-
-  stop() => AudioService.stop();
-
-  loadSongByTaskId(taskId, AudioPlayer audioPlayer) async {
-    var tasks = await FlutterDownloader.loadTasks();
-    var task = tasks.firstWhere((element) => element.taskId == taskId);
-
-    final path = join(task.savedDir, task.filename);
-    var r = await audioPlayer.play('file://' + path, isLocal: true);
-    audioPlayer.seek(Duration(seconds: 0));
-  }
-
   download(String videoId) async {
     if (await DatabaseHelper.doesCodeAlreadyExist(videoId)) {
       var fileData = await DatabaseHelper.getVideoInfo(videoId);
@@ -181,7 +150,7 @@ class HomePage extends HookWidget {
     var data;
 
     try {
-      var response = await Dio().get("http://192.168.2.122:3000/info/$videoId");
+      var response = await Dio().get("---/info/$videoId");
       data = response.data;
     } catch (e) {
       print(e);

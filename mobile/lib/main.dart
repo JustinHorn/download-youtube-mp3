@@ -10,7 +10,7 @@ void main() async {
       debug: true // optional: set false to disable printing logs to console
       );
   FlutterDownloader.registerCallback(downloadCallback);
-  AudioPlayer.logEnabled = true;
+  AudioPlayer.logEnabled = false;
 
   runApp(MyApp());
 }
