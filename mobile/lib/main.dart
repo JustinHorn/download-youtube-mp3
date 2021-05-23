@@ -61,10 +61,6 @@ class HomePage extends HookWidget {
     final audioplayer = useState<AudioPlayer>(AudioPlayer());
 
     useEffect(() {
-      // AudioManager.instance.onEvents((events, args) {
-      //   print("$events, $args");
-      // });
-
       audioplayer.value.onDurationChanged.listen((Duration d) {
         print('Max duration: $d');
       });
@@ -158,6 +154,7 @@ class HomePage extends HookWidget {
     final path = join(task.savedDir, task.filename);
     print(path);
     var r = await audioPlayer.play('file://' + path, isLocal: true);
+    audioPlayer.seek(Duration(seconds: 0));
     print(r);
   }
 
@@ -188,7 +185,11 @@ class HomePage extends HookWidget {
       return;
     }
 
-    var localPath = (await getApplicationDocumentsDirectory()).path;
+    var localPath = Platform.isIOS
+        ? (await getApplicationDocumentsDirectory()).path +
+            Platform.pathSeparator +
+            'Download'
+        : (await getApplicationDocumentsDirectory()).path;
     final savedDir = Directory(localPath);
     bool hasExisted = await savedDir.exists();
     if (!hasExisted) {
