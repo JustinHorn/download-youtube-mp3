@@ -1,8 +1,14 @@
 PODS:
+  - audio_service (0.0.1):
+    - Flutter
+  - audio_session (0.0.1):
+    - Flutter
   - audioplayers (0.0.1):
     - Flutter
   - Flutter (1.0.0)
   - flutter_downloader (0.0.1):
+    - Flutter
+  - flutter_isolate (0.0.1):
     - Flutter
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
@@ -14,9 +20,12 @@ PODS:
     - FMDB (>= 2.7.5)
 
 DEPENDENCIES:
+  - audio_service (from `.symlinks/plugins/audio_service/ios`)
+  - audio_session (from `.symlinks/plugins/audio_session/ios`)
   - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
   - Flutter (from `Flutter`)
   - flutter_downloader (from `.symlinks/plugins/flutter_downloader/ios`)
+  - flutter_isolate (from `.symlinks/plugins/flutter_isolate/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
 
@@ -25,21 +34,30 @@ SPEC REPOS:
     - FMDB
 
 EXTERNAL SOURCES:
+  audio_service:
+    :path: ".symlinks/plugins/audio_service/ios"
+  audio_session:
+    :path: ".symlinks/plugins/audio_session/ios"
   audioplayers:
     :path: ".symlinks/plugins/audioplayers/ios"
   Flutter:
     :path: Flutter
   flutter_downloader:
     :path: ".symlinks/plugins/flutter_downloader/ios"
+  flutter_isolate:
+    :path: ".symlinks/plugins/flutter_isolate/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
 
 SPEC CHECKSUMS:
+  audio_service: f509d65da41b9521a61f1c404dd58651f265a567
+  audio_session: 4f3e461722055d21515cf3261b64c973c062f345
   audioplayers: 455322b54050b30ea4b1af7cd9e9d105f74efa8c
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_downloader: 058b9c41564a90500f67f3e432e3524613a7fd83
+  flutter_isolate: 0edf5081826d071adf21759d1eb10ff5c24503b5
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
