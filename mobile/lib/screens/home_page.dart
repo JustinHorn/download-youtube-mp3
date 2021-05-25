@@ -11,7 +11,7 @@ import 'package:mobile/models/video_info.dart';
 import 'package:mobile/music_tile.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'audio_player_page.dart';
+import 'audioplayer_page.dart';
 
 class HomePage extends HookWidget {
   final String title;

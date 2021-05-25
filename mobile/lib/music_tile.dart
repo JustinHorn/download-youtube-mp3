@@ -32,7 +32,40 @@ class MusicTile extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.delete),
-            onPressed: onDelete,
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                barrierDismissible: false, // user must tap button!
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Delete ${videoInfo.title}'),
+                    content: SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          Text('Do you really want to delete this mp3?'),
+                        ],
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('Confirm'),
+                        onPressed: () async {
+                          await onDelete();
+                          print('Confirmed');
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
         ],
       ),

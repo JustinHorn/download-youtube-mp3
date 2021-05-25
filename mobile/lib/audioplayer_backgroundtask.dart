@@ -34,23 +34,31 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   Future<void> onPlay() async {
-    AudioServiceBackground.setState(
-        controls: [MediaControl.pause, MediaControl.stop],
-        playing: true,
-        processingState: AudioProcessingState.ready);
-    await _audioPlayer.resume();
+    try {
+      AudioServiceBackground.setState(
+          controls: [MediaControl.pause, MediaControl.stop],
+          playing: true,
+          processingState: AudioProcessingState.ready);
+      await _audioPlayer.resume();
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> onSeekTo(Duration position) => _audioPlayer.seek(position);
 
   @override
   Future<void> onPause() async {
-    AudioServiceBackground.setState(
-      controls: [MediaControl.play, MediaControl.stop],
-      playing: false,
-      processingState: AudioProcessingState.ready,
-    );
-    await _audioPlayer.pause();
+    try {
+      AudioServiceBackground.setState(
+        controls: [MediaControl.play, MediaControl.stop],
+        playing: false,
+        processingState: AudioProcessingState.ready,
+      );
+      await _audioPlayer.pause();
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override

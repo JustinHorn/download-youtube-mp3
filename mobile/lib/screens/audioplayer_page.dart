@@ -6,7 +6,7 @@ import 'package:mobile/models/video_info.dart';
 import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../audio_player_task.dart';
+import '../audioplayer_backgroundtask.dart';
 
 _backgroundTaskEntrypoint() {
   AudioServiceBackground.run(() => AudioPlayerTask());

@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile/screens/homepage.dart';
+import 'package:mobile/screens/home_page.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
 void main() async {
