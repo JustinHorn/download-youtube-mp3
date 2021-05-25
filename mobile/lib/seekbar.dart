@@ -8,7 +8,7 @@ class SeekBar extends StatefulWidget {
   final ValueChanged<Duration> onChanged;
   final ValueChanged<Duration> onChangeEnd;
 
-  SeekBar({
+  const SeekBar({
     @required this.duration,
     @required this.position,
     this.onChanged,
@@ -25,6 +25,8 @@ class _SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
+    print("seekbar");
+    print(widget.position);
     final value = min(_dragValue ?? widget.position.inMilliseconds.toDouble(),
         widget.duration.inMilliseconds.toDouble());
     if (_dragValue != null && !_dragging) {
@@ -58,9 +60,10 @@ class _SeekBarState extends State<SeekBar> {
           right: 16.0,
           bottom: 0.0,
           child: Text(
-              RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$')
-                      .firstMatch("$_remaining")
-                      ?.group(1) ??
+              'Remaining: ' +
+                      RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$')
+                          .firstMatch("$_remaining")
+                          ?.group(1) ??
                   '$_remaining',
               style: Theme.of(context).textTheme.caption),
         ),
@@ -68,5 +71,9 @@ class _SeekBarState extends State<SeekBar> {
     );
   }
 
-  Duration get _remaining => widget.duration - widget.position;
+  Duration get _remaining {
+    var r = widget.duration - widget.position;
+
+    return r.inMilliseconds > 0 ? r : Duration.zero;
+  }
 }

@@ -8,8 +8,8 @@ class AudioPlayerTask extends BackgroundAudioTask {
   @override
   Future<void> onStart(Map<String, dynamic> params) async {
     // Now we're ready to play
-    print(params);
     try {
+      print("hi how are you?");
       var videoInfo = VideoInfo.fromMap(params);
 
       await AudioServiceBackground.setMediaItem(
@@ -22,10 +22,12 @@ class AudioPlayerTask extends BackgroundAudioTask {
       var r =
           await _audioPlayer.play('file://' + params['path'], isLocal: true);
       _audioPlayer.seek(Duration(seconds: 0));
+
       await AudioServiceBackground.setState(
         controls: [MediaControl.pause, MediaControl.stop],
+        position: Duration.zero,
         playing: true,
-        processingState: AudioProcessingState.connecting,
+        processingState: AudioProcessingState.ready,
       );
     } catch (e) {
       print(e);
@@ -35,17 +37,25 @@ class AudioPlayerTask extends BackgroundAudioTask {
   @override
   Future<void> onPlay() async {
     try {
+      await _audioPlayer.resume();
+
       AudioServiceBackground.setState(
           controls: [MediaControl.pause, MediaControl.stop],
+          position:
+              Duration(milliseconds: await _audioPlayer.getCurrentPosition()),
           playing: true,
           processingState: AudioProcessingState.ready);
-      await _audioPlayer.resume();
     } catch (e) {
       print(e);
     }
   }
 
-  Future<void> onSeekTo(Duration position) => _audioPlayer.seek(position);
+  @override
+  Future<void> onSeekTo(Duration position) async {
+    await _audioPlayer.seek(position);
+    await _audioPlayer.resume();
+    await AudioServiceBackground.setState(position: position);
+  }
 
   @override
   Future<void> onPause() async {

@@ -37,6 +37,7 @@ router.get("/info/:videoCode", async function (req, res, next) {
     );
 
     const audioURL = audios.length > 0 ? audios[0].url : undefined;
+    console.log(videoDetails);
 
     const infoData = {
       code: videoCode,

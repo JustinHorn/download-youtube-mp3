@@ -38,95 +38,76 @@ class HomePage extends HookWidget {
       }();
       return () => {};
     }, []);
-    return StreamBuilder<PlaybackState>(
-      stream: AudioService.playbackStateStream,
-      builder: (context, snapshot) {
-        final isPlaying = snapshot.data?.playing ?? false;
-        final hasSound =
-            snapshot.data?.processingState == AudioProcessingState.ready ??
-                false;
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(title),
-          ),
-          body: Center(
-            child: Container(
-              height: double.infinity,
-              width: MediaQuery.of(context).size.width * 0.8,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Center(
+        child: Container(
+          height: double.infinity,
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: TextField(
-                          decoration:
-                              InputDecoration(hintText: "Enter Video Code"),
-                          onChanged: (t) => inputText.value = t,
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.file_download),
-                        onPressed: () => download(inputText.value),
-                      )
-                    ],
+                  Flexible(
+                    child: TextField(
+                      decoration: InputDecoration(hintText: "Enter Video Code"),
+                      onChanged: (t) => inputText.value = t,
+                    ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: videoInfos.value
-                        .map((info) => MusicTile(
-                              videoInfo: info,
-                              onPlay: () async {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        AudioPlayerScreen(info),
-                                  ),
-                                );
-                              },
-                              onDelete: () async {
-                                await FlutterDownloader.remove(
-                                    taskId: info.taskId,
-                                    shouldDeleteContent: true);
-                                await DatabaseHelper.deleteVideoInfo(info.code);
-                                videoInfos.value =
-                                    await DatabaseHelper.getVideoInfos();
-                              },
-                            ))
-                        .toList(),
-                  ),
-                  SizedBox(
-                    height: 0,
+                  IconButton(
+                    icon: Icon(Icons.file_download),
+                    onPressed: () => download(inputText.value),
                   )
                 ],
               ),
-            ),
-          ),
-          floatingActionButton: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (hasSound)
-                FloatingActionButton(
-                  onPressed: () async {
-                    await audioplayer.value.pause();
-                  },
-                  tooltip: 'play',
-                  child: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                ),
-              SizedBox(height: 10),
-              FloatingActionButton(
-                onPressed: () async {
-                  videoInfos.value = await DatabaseHelper.getVideoInfos();
-                },
-                tooltip: 'Increment',
-                child: Icon(Icons.repeat),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: videoInfos.value
+                    .map((info) => MusicTile(
+                          videoInfo: info,
+                          onPlay: () async {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AudioPlayerScreen(info),
+                              ),
+                            );
+                          },
+                          onDelete: () async {
+                            await FlutterDownloader.remove(
+                                taskId: info.taskId, shouldDeleteContent: true);
+                            await DatabaseHelper.deleteVideoInfo(info.code);
+                            videoInfos.value =
+                                await DatabaseHelper.getVideoInfos();
+                          },
+                        ))
+                    .toList(),
               ),
+              SizedBox(
+                height: 0,
+              )
             ],
-          ), // This trailing comma makes auto-formatting nicer for build methods.
-        );
-      },
+          ),
+        ),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'fab1',
+            onPressed: () async {
+              videoInfos.value = await DatabaseHelper.getVideoInfos();
+            },
+            tooltip: 'Increment',
+            child: Icon(Icons.repeat),
+          ),
+        ],
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
@@ -150,7 +131,7 @@ class HomePage extends HookWidget {
     var data;
 
     try {
-      var response = await Dio().get("---/info/$videoId");
+      var response = await Dio().get("---info/$videoId");
       data = response.data;
     } catch (e) {
       print(e);

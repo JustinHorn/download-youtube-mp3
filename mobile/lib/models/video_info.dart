@@ -14,7 +14,7 @@ class VideoInfo {
       json['code'],
       json['title'],
       json['thumbnail'],
-      json['lengthSeconds'],
+      json['seconds'],
       json['audioURL'],
       json['taskId'],
     );

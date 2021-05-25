@@ -4,26 +4,13 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mobile/models/video_info.dart';
 import 'package:path/path.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../audioplayer_backgroundtask.dart';
+import '../seekbar.dart';
 
 _backgroundTaskEntrypoint() {
   AudioServiceBackground.run(() => AudioPlayerTask());
 }
-
-class MediaState {
-  final MediaItem mediaItem;
-  final Duration position;
-
-  MediaState(this.mediaItem, this.position);
-}
-
-Stream<MediaState> get _mediaStateStream =>
-    Rx.combineLatest2<MediaItem, Duration, MediaState>(
-        AudioService.currentMediaItemStream,
-        AudioService.positionStream,
-        (mediaItem, position) => MediaState(mediaItem, position));
 
 class AudioPlayerScreen extends HookWidget {
   final VideoInfo videoInfo;
@@ -48,42 +35,47 @@ class AudioPlayerScreen extends HookWidget {
       }();
       return () {};
     }, []);
-    return StreamBuilder<PlaybackState>(
-      stream: AudioService.playbackStateStream,
-      builder: (context, snapshot) {
-        final isPlaying = snapshot.data?.playing ?? false;
-        final hasSound =
-            snapshot.data?.processingState == AudioProcessingState.ready ??
-                false;
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(videoInfo.title),
-          ),
-          body: Center(
-            child: Container(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    print('seconds: ${videoInfo.seconds}');
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(videoInfo.title),
+      ),
+      body: Center(
+        child: Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.network(videoInfo.thumbnail),
+              StreamBuilder(
+                stream: AudioService.positionStream,
+                builder: (context, snasphsot) {
+                  final position = snasphsot.data ?? Duration.zero;
+                  return SeekBar(
+                    position: position,
+                    duration: Duration(seconds: videoInfo.seconds),
+                    onChangeEnd: (value) {
+                      AudioService.seekTo(value);
+                    },
+                  );
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.network(videoInfo.thumbnail),
-                  Slider(value: 0.5, onChanged: (x) {}),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(width: 0),
-                      ElevatedButton(child: Text("Play"), onPressed: play),
-                      ElevatedButton(child: Text("Pause"), onPressed: pause),
-                      ElevatedButton(
-                          child: Text("Stop"), onPressed: () => stop(context)),
-                      SizedBox(width: 0),
-                    ],
-                  ),
+                  SizedBox(width: 0),
+                  ElevatedButton(child: Text("Play"), onPressed: play),
+                  ElevatedButton(child: Text("Pause"), onPressed: pause),
+                  ElevatedButton(
+                      child: Text("Stop"), onPressed: () => stop(context)),
+                  SizedBox(width: 0),
                 ],
               ),
-            ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
