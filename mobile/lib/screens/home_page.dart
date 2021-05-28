@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
@@ -17,12 +19,17 @@ class HomePage extends HookWidget {
 
   HomePage(this.title);
 
+  ReceivePort _port = ReceivePort();
+
   @override
   Widget build(BuildContext context) {
     final inputText = useState("");
 
     final videoInfos = useState<List<VideoInfo>>([]);
     final audioplayer = useState<AudioPlayer>(AudioPlayer());
+
+    final progress = useState(0.0);
+    final status = useState<DownloadTaskStatus>(DownloadTaskStatus.undefined);
 
     useEffect(() {
       audioplayer.value.onDurationChanged.listen((Duration d) {
@@ -35,8 +42,21 @@ class HomePage extends HookWidget {
       () async {
         videoInfos.value = await DatabaseHelper.getVideoInfos();
       }();
-      return () => {};
+      _bindBackgroundIsolate(progress, status);
+      return () {
+        _unbindBackgroundIsolate();
+      };
     }, []);
+
+    useEffect(() {
+      () async {
+        if (progress.value == 100.0 &&
+            status.value == DownloadTaskStatus.complete) {
+          videoInfos.value = await DatabaseHelper.getVideoInfos();
+        }
+      }();
+      return () {};
+    }, [progress.value, status.value]);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,6 +84,7 @@ class HomePage extends HookWidget {
                   )
                 ],
               ),
+              Text(progress.value.toString()),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: videoInfos.value
@@ -94,20 +115,33 @@ class HomePage extends HookWidget {
           ),
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: 'fab1',
-            onPressed: () async {
-              videoInfos.value = await DatabaseHelper.getVideoInfos();
-            },
-            tooltip: 'Increment',
-            child: Icon(Icons.repeat),
-          ),
-        ],
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void _bindBackgroundIsolate(progress, status) {
+    print('binding');
+    bool isSuccess = IsolateNameServer.registerPortWithName(
+        _port.sendPort, 'downloader_send_port');
+    if (!isSuccess) {
+      _unbindBackgroundIsolate();
+      _bindBackgroundIsolate(progress, status);
+      return;
+    }
+
+    print('success!');
+    _port.listen((dynamic data) {
+      String id = data[0];
+      DownloadTaskStatus _status = data[1];
+      int _progress = data[2];
+
+      status.value = _status ?? DownloadTaskStatus.undefined;
+      progress.value = _progress.toDouble() ?? 0.0;
+      print('progress $_progress');
+    });
+  }
+
+  void _unbindBackgroundIsolate() {
+    IsolateNameServer.removePortNameMapping('downloader_send_port');
   }
 
   download(String videoId) async {

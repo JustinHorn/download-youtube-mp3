@@ -1,3 +1,6 @@
+import 'dart:isolate';
+import 'dart:ui';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +13,7 @@ void main() async {
       debug: false // optional: set false to disable printing logs to console
       );
   FlutterDownloader.registerCallback(downloadCallback);
+
   AudioPlayer.logEnabled = false;
 
   runApp(MyApp());
@@ -32,4 +36,7 @@ class MyApp extends StatelessWidget {
 void downloadCallback(String id, DownloadTaskStatus status, int progress) {
   print(
       'Background Isolate Callback: task ($id) is in status ($status) and process ($progress)');
+  final SendPort send =
+      IsolateNameServer.lookupPortByName('downloader_send_port');
+  if (send != null) send.send([id, status, progress]);
 }
