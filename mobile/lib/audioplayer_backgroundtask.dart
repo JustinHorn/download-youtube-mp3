@@ -58,6 +58,11 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   @override
+  Future<void> onSetSpeed(double speed) async {
+    await _audioPlayer.setPlaybackRate(playbackRate: speed);
+  }
+
+  @override
   Future<void> onPause() async {
     try {
       AudioServiceBackground.setState(

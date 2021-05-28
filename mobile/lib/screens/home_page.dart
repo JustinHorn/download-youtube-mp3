@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +130,7 @@ class HomePage extends HookWidget {
     var data;
 
     try {
-      var response = await Dio().get("---info/$videoId");
+      var response = await Dio().get("---/info/$videoId");
       data = response.data;
     } catch (e) {
       print(e);

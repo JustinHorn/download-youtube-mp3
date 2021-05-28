@@ -19,6 +19,8 @@ class AudioPlayerScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final playbackSpeed = useState<double>(1);
+
     useEffect(() {
       () async {
         var tasks = await FlutterDownloader.loadTasks();
@@ -36,6 +38,11 @@ class AudioPlayerScreen extends HookWidget {
       return () {};
     }, []);
 
+    useEffect(() {
+      AudioService.setSpeed(playbackSpeed.value);
+      return () {};
+    }, [playbackSpeed.value]);
+
     print('seconds: ${videoInfo.seconds}');
 
     return Scaffold(
@@ -47,7 +54,32 @@ class AudioPlayerScreen extends HookWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.network(videoInfo.thumbnail),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(child: Container()),
+                  Image.network(videoInfo.thumbnail),
+                  Expanded(
+                    child: DropdownButton<double>(
+                      underline: Container(),
+                      elevation: 8,
+                      items: <double>[0.5, 0.75, 1.0, 1.5, 2.0]
+                          .map((double value) {
+                        return new DropdownMenuItem<double>(
+                          value: value,
+                          child: new Text(value.toString() + "x"),
+                        );
+                      }).toList(),
+                      value: playbackSpeed.value,
+                      onChanged: (value) {
+                        playbackSpeed.value = value;
+                      },
+                    ),
+                  )
+                ],
+              ),
               StreamBuilder(
                 stream: AudioService.positionStream,
                 builder: (context, snasphsot) {
