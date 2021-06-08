@@ -19,13 +19,13 @@ class AudioPlayerScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final playbackSpeed = useState<double>(1);
+    final ValueNotifier<double?> playbackSpeed = useState<double>(1);
 
     useEffect(() {
       () async {
-        var tasks = await FlutterDownloader.loadTasks();
+        var tasks = await (FlutterDownloader.loadTasks());
         var task =
-            tasks.firstWhere((element) => element.taskId == videoInfo.taskId);
+            tasks!.firstWhere((element) => element.taskId == videoInfo.taskId);
         print(task);
 
         final path = join(task.savedDir, task.filename);
@@ -39,7 +39,7 @@ class AudioPlayerScreen extends HookWidget {
     }, []);
 
     useEffect(() {
-      AudioService.setSpeed(playbackSpeed.value);
+      AudioService.setSpeed(playbackSpeed.value!);
       return () {};
     }, [playbackSpeed.value]);
 
@@ -83,7 +83,8 @@ class AudioPlayerScreen extends HookWidget {
               StreamBuilder(
                 stream: AudioService.positionStream,
                 builder: (context, snasphsot) {
-                  final position = snasphsot.data ?? Duration.zero;
+                  final position =
+                      (snasphsot.data ?? Duration.zero) as Duration;
                   return SeekBar(
                     position: position,
                     duration: Duration(seconds: videoInfo.seconds),

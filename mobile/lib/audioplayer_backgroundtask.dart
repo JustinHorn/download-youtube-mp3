@@ -6,11 +6,11 @@ class AudioPlayerTask extends BackgroundAudioTask {
   final _audioPlayer = AudioPlayer();
 
   @override
-  Future<void> onStart(Map<String, dynamic> params) async {
+  Future<void> onStart(Map<String, dynamic>? params) async {
     // Now we're ready to play
     try {
       print("hi how are you?");
-      var videoInfo = VideoInfo.fromMap(params);
+      var videoInfo = VideoInfo.fromMap(params!);
 
       await AudioServiceBackground.setMediaItem(
         MediaItem(

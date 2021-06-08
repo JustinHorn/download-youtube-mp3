@@ -131,8 +131,8 @@ class HomePage extends HookWidget {
 
     print('success!');
     _port.listen((dynamic data) {
-      String id = data[0];
-      DownloadTaskStatus _status = data[1];
+      String? id = data[0];
+      DownloadTaskStatus? _status = data[1];
       int _progress = data[2];
 
       status.value = _status ?? DownloadTaskStatus.undefined;
@@ -149,9 +149,9 @@ class HomePage extends HookWidget {
     if (await DatabaseHelper.doesCodeAlreadyExist(videoId)) {
       var fileData = await DatabaseHelper.getVideoInfo(videoId);
 
-      var tasks = await FlutterDownloader.loadTasks();
+      var tasks = await (FlutterDownloader.loadTasks());
       var task =
-          tasks.firstWhere((element) => element.taskId == fileData.taskId);
+          tasks!.firstWhere((element) => element.taskId == fileData.taskId);
       if (task.status == DownloadTaskStatus.failed) {
         var info = fileData.toMap();
 

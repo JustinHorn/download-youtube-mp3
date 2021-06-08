@@ -4,10 +4,10 @@ import 'package:mobile/models/video_info.dart';
 
 class MusicTile extends StatelessWidget {
   final VideoInfo videoInfo;
-  final Function onPlay;
-  final Function onDelete;
+  final Function? onPlay;
+  final Function? onDelete;
 
-  const MusicTile({Key key, this.videoInfo, this.onPlay, this.onDelete})
+  const MusicTile({Key? key, required this.videoInfo, this.onPlay, this.onDelete})
       : super(key: key);
 
   @override
@@ -28,7 +28,7 @@ class MusicTile extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.play_arrow),
-            onPressed: onPlay,
+            onPressed: onPlay as void Function()?,
           ),
           IconButton(
             icon: Icon(Icons.delete),
@@ -50,7 +50,7 @@ class MusicTile extends StatelessWidget {
                       TextButton(
                         child: Text('Confirm'),
                         onPressed: () async {
-                          await onDelete();
+                          await onDelete!();
                           print('Confirmed');
                           Navigator.of(context).pop();
                         },

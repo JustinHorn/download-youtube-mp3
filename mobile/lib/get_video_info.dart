@@ -39,11 +39,11 @@ findPlayerResponse(info) {
   var jsonClosingChars = r"^[)\]}'\s]+";
 
   String player_response = info != null
-      ? ((info['args'] != null
+      ? info['args'] != null
           ? info['args']['player_response']
           : info['player_response'] ??
               info['playerResponse'] ??
-              info['embedded_player_response']))
+              info['embedded_player_response']
       : null;
 
   player_response = player_response.replaceAll(jsonClosingChars, "");

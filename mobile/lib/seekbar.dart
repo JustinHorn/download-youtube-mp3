@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 class SeekBar extends StatefulWidget {
   final Duration duration;
   final Duration position;
-  final ValueChanged<Duration> onChanged;
-  final ValueChanged<Duration> onChangeEnd;
+  final ValueChanged<Duration>? onChanged;
+  final ValueChanged<Duration>? onChangeEnd;
 
   const SeekBar({
-    @required this.duration,
-    @required this.position,
+    required this.duration,
+    required this.position,
     this.onChanged,
     this.onChangeEnd,
   });
@@ -20,7 +20,7 @@ class SeekBar extends StatefulWidget {
 }
 
 class _SeekBarState extends State<SeekBar> {
-  double _dragValue;
+  double? _dragValue;
   bool _dragging = false;
 
   @override
@@ -46,12 +46,12 @@ class _SeekBarState extends State<SeekBar> {
               _dragValue = value;
             });
             if (widget.onChanged != null) {
-              widget.onChanged(Duration(milliseconds: value.round()));
+              widget.onChanged!(Duration(milliseconds: value.round()));
             }
           },
           onChangeEnd: (value) {
             if (widget.onChangeEnd != null) {
-              widget.onChangeEnd(Duration(milliseconds: value.round()));
+              widget.onChangeEnd!(Duration(milliseconds: value.round()));
             }
             _dragging = false;
           },
@@ -61,10 +61,10 @@ class _SeekBarState extends State<SeekBar> {
           bottom: 0.0,
           child: Text(
               'Remaining: ' +
-                      RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$')
-                          .firstMatch("$_remaining")
-                          ?.group(1) ??
-                  '$_remaining',
+                  (RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$')
+                          .firstMatch(_remaining.toString())
+                          ?.group(1)! ??
+                      '$_remaining'),
               style: Theme.of(context).textTheme.caption),
         ),
       ],

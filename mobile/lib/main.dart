@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
 void downloadCallback(String id, DownloadTaskStatus status, int progress) {
   print(
       'Background Isolate Callback: task ($id) is in status ($status) and process ($progress)');
-  final SendPort send =
+  final SendPort? send =
       IsolateNameServer.lookupPortByName('downloader_send_port');
   if (send != null) send.send([id, status, progress]);
 }
