@@ -131,12 +131,12 @@ class HomePage extends HookWidget {
 
     print('success!');
     _port.listen((dynamic data) {
-      String? id = data[0];
+      //String? id = data[0];
       DownloadTaskStatus? _status = data[1];
       int _progress = data[2];
 
       status.value = _status ?? DownloadTaskStatus.undefined;
-      progress.value = _progress.toDouble() ?? 0.0;
+      progress.value = _progress.toDouble();
       print('progress $_progress');
     });
   }
